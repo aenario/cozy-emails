@@ -15,7 +15,7 @@ module.exports = React.createClass
 
     render: ->
         accounts = @props.accounts
-        if Object.keys(accounts).length is 1
+        if accounts.length is 1
             @renderNoChoice()
         else
             @renderPicker()

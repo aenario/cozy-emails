@@ -23,11 +23,24 @@ module.exports = MessageActionCreator =
 
 
     send: (message, callback) ->
+
+        isDraft = message.isDraft
+
+        AppDispatcher.handleViewAction
+            type: ActionTypes.MESSAGE_SEND_REQUEST
+            value: {isDraft, message}
+
         XHRUtils.messageSend message, (error, message) ->
             if (not error?) and (message?)
                 AppDispatcher.handleViewAction
-                    type: ActionTypes.MESSAGE_SEND
-                    value: message
+                    type: ActionTypes.MESSAGE_SEND_SUCCESS
+                    value: {isDraft, message}
+
+            else
+                AppDispatcher.handleViewAction
+                    type: ActionTypes.MESSAGE_SEND_FAILURE
+                    value: {isDraft, message, error}
+
             callback? error, message
 
 

@@ -110,6 +110,9 @@ module.exports = MessageUtils =
         <p><br></p>
             """
 
+    makeNewMessage: (signature) ->
+        @makeReplyMessage null, null, null, true, signature
+
     # Build message to put in the email composer depending on the context
     # (reply, reply to all, forward or simple message).
     # It add appropriate headers to the message. It adds style tags when
@@ -179,7 +182,7 @@ module.exports = MessageUtils =
         notMe = (dest) -> return dest.address isnt myAddress
         message.to = message.to.filter notMe
         message.cc = message.cc.filter notMe
-        return message
+        return Immutable.Map message
 
 
     # Build message to display in composer in case of a reply to a message:

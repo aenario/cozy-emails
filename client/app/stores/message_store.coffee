@@ -388,7 +388,7 @@ class MessageStore extends Store
                 onReceiveRawMessage message
             @emit 'change'
 
-        handle ActionTypes.MESSAGE_SEND, (message) ->
+        handle ActionTypes.MESSAGE_SEND_SUCCESS, ({message}) ->
             onReceiveRawMessage message
             @emit 'change'
 

@@ -219,10 +219,13 @@ module.exports = LayoutActionCreator =
             type: ActionTypes.DRAWER_TOGGLE
 
     displayModal: (params) ->
-        params.closeModal ?= -> LayoutActionCreator.hideModal()
+        params.closeModal ?= LayoutActionCreator.hideModal
         AppDispatcher.handleViewAction
             type: ActionTypes.DISPLAY_MODAL
             value: params
+
+    displayModalNextTick: (params) ->
+        setTimeout (=> LayoutActionCreator.displayModal params), 0
 
     hideModal: ->
         AppDispatcher.handleViewAction
