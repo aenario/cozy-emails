@@ -19,6 +19,9 @@
 classer = React.addons.classSet
 PropTypes = require '../libs/prop_types'
 
+Clearfix = React.createClass
+    render: -> div className: 'clearfix', null
+
 
 Container = React.createClass
 
@@ -322,5 +325,6 @@ module.exports = {
     SubTitle
     Title
     Tabs
+    Clearfix
 }
 

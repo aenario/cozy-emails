@@ -19,9 +19,14 @@ SearchStore   = require '../stores/search_store'
 SettingsStore = require '../stores/settings_store'
 
 MessageActionCreator = require '../actions/message_action_creator'
+MessageUtils = require '../utils/message_utils'
 
 {ComposeActions, MessageFilter} = require '../constants/app_constants'
 
+PANEL_ACTION_TO_COMPOSE_ACTION =
+    'compose.reply'     : ComposeActions.REPLY
+    'compose.forward'   : ComposeActions.FORWARD
+    'compose.reply-all' : ComposeActions.REPLY_ALL
 
 module.exports = Panel = React.createClass
     displayName: 'Panel'
@@ -71,17 +76,54 @@ module.exports = Panel = React.createClass
                 ref: 'conversation'
 
         # -- Generates the new message composition form
-        else if @props.action is 'compose' or
-                @props.action is 'edit' or
-                @props.action is 'compose.reply' or
+        else if @props.action is 'compose'
+
+            account = AccountStore.getSelectedOrDefault()
+            return Spinner() unless account
+
+            signature = account.get('signature')
+
+            Compose
+                key               : 'compose-new'
+                selectedMailboxID : @props.selectedMailboxID
+                useIntents        : @props.useIntents
+                message           : MessageUtils.makeNewMessage signature
+
+        else if @props.action is 'edit'
+
+            message = MessageStore.getByID @props.messageID
+            return Spinner() unless message
+
+            Compose
+                key: "compose-edit-#{message.get 'id'}"
+                message: message
+
+        else if @props.action is 'compose.reply' or
                 @props.action is 'compose.reply-all' or
                 @props.action is 'compose.forward'
 
-            @renderCompose()
+            message = MessageStore.getByID @props.messageID
+            return Spinner() unless message
+
+            account = AccountStore.getByID @props.accountID
+            return Spinner() unless account
+
+            composeAction = PANEL_ACTION_TO_COMPOSE_ACTION[@props.action]
+            unless composeAction
+                throw new Error "unknown compose type : #{@prop.action}"
+
+            Compose
+                key: "compose-#{composeAction}-#{message.get('id')}"
+                message: MessageUtils.makeReplyMessage(
+                    account.get('login'),
+                    options.inReplyTo,
+                    composeAction,
+                    true,
+                    account.get('signature')
+                )
 
         # -- Display the settings form
         else if @props.action is 'settings'
-
             Settings
                 key     : 'settings'
                 ref     : 'settings'
@@ -168,65 +210,7 @@ module.exports = Panel = React.createClass
     # Rendering the compose component requires several parameters. The main one
     # are related to the selected account, the selected mailbox and the compose
     # state (classic, draft, reply, reply all or forward).
-    renderCompose: ->
-        options =
-            layout               : 'full'
-            action               : null
-            inReplyTo            : null
-            settings             : @state.settings
-            accounts             : @state.accounts
-            selectedAccountID    : @state.selectedAccount.get 'id'
-            selectedAccountLogin : @state.selectedAccount.get 'login'
-            selectedMailboxID    : @props.selectedMailboxID
-            useIntents           : @props.useIntents
-            ref                  : 'compose'
 
-        component = null
-
-        # Generates an empty compose form
-        if @props.action is 'compose'
-            message = null
-            component = Compose options
-
-        # Generates the edit draft composition form.
-        else if @props.action is 'edit'
-            options.message = MessageStore.getByID @props.messageID
-            component = Compose options
-
-        # Generates the reply composition form.
-        else if @props.action is 'compose.reply'
-            options.action = ComposeActions.REPLY
-            component = @getReplyComponent options
-
-        # Generates the reply all composition form.
-        else if @props.action is 'compose.reply-all'
-            options.action = ComposeActions.REPLY_ALL
-            component = @getReplyComponent options
-
-        # Generates the forward composition form.
-        else if @props.action is 'compose.forward'
-            options.action = ComposeActions.FORWARD
-            component = @getReplyComponent options
-        else
-            throw new Error "unknown compose type : #{@prop.action}"
-
-        return component
-
-
-    # Configure the component depending on the given action.
-    # Returns a spinner if the message is not available.
-    getReplyComponent: (options) ->
-        message = MessageStore.getByID @props.messageID
-
-        if not(@state.isLoadingReply) or message?
-            message = MessageStore.getByID @props.messageID
-            message.set 'id', @props.messageID
-            options.inReplyTo = message
-            component = Compose options
-        else
-            component = Spinner()
-
-        return component
 
 
     getStateFromStores: ->
@@ -244,6 +228,5 @@ module.exports = Panel = React.createClass
             conversation          : MessageStore.getCurrentConversation()
             currentConversationID : MessageStore.getCurrentConversationID()
             settings              : SettingsStore.get()
-            isLoadingReply        : not MessageStore.getByID(@props.messageID)?
             refresh           : AccountStore.getMailboxRefresh @props.mailboxID
         }

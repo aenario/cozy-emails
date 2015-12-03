@@ -34,7 +34,7 @@ module.exports = AccountConfigMailboxes = React.createClass
 
     makeLinkState: (field) ->
         currentValue = @props.editedAccount.get(field)
-        cachedTransform @, '__cacheLS', currentValue, =>
+        cachedTransform @, '__cacheLS', field, currentValue, =>
             value: currentValue
             requestChange: (value) =>
                 changes = {}

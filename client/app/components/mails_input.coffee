@@ -19,6 +19,9 @@ module.exports = MailsInput = React.createClass
     componentWillMount: ->
         @setState contacts: null, open: false
 
+    getDefaultProps: ->
+        className: ''
+
     getInitialState: ->
         state = @getStateFromStores()
         state.known    = @props.valueLink.value
@@ -84,82 +87,49 @@ module.exports = MailsInput = React.createClass
                         onClick: remove,
                             i className: 'fa fa-times'
 
-        knownContacts = @state.known.map renderTag
+        className  = "#{@props.className} form-group mail-input #{@props.id}"
+        if @props.classShown
+            className += " shown"
 
-        # set focus to input area when clicking into component
-        onClick = =>
-            @refs.contactInput.getDOMNode().focus()
-
-        onChange = (event) =>
-            value = event.target.value.split ','
-            if value.length is 2
-                known = _.clone @state.known
-                known.push(MessageUtils.parseAddress value[0])
-                @props.valueLink.requestChange known
-                @setState unknown: value[1].trim()
-            else
-                @setState unknown: event.target.value
-
-        onInput = (event) =>
-            input = @refs.contactInput.getDOMNode()
-            input.cols = input.value.length + 2
-            input.style.height = input.scrollHeight + 'px'
-
-        className  = """
-           #{@props.className or ''} form-group mail-input #{@props.id}
-        """
-        classLabel = 'compose-label control-label'
         listClass  = classer
+            'contact-group': true
+            'dropdown': true
             'contact-form': true
             open: @state.open and @state.contacts?.length > 0
         current    = 0
 
-        # in Chrome, we need to cancel some events for drop to work
-        cancelDragEvent = (event) =>
-            event.preventDefault()
-            # To prevent removing the contact when dropped where it has been dragged,
-            # we must set dropEffect to 'none'
-            # if Chrome, we can only access types of data, not data themselves
-            # In Chrome, types are an array; in Firefox, a DOMStringList
-            types = Array.prototype.slice.call(event.dataTransfer.types)
-            if types.indexOf(@props.id) is -1
-                event.dataTransfer.dropEffect = 'move'
-            else
-                event.dataTransfer.dropEffect = 'none'
-
-        # don't display placeholder if there are dests
-        if knownContacts.length > 0
-            placeholder = ''
-        else
-            placeholder = @props.placeholder
-
         div
             className: className,
-            onClick: onClick
+            onClick: @onClick
             onDrop: @onDrop,
-            onDragEnter: cancelDragEvent,
-            onDragLeave: cancelDragEvent,
-            onDragOver: cancelDragEvent,
-                label htmlFor: @props.id, className: classLabel,
+            onDragEnter: @cancelDragEvent,
+            onDragLeave: @cancelDragEvent,
+            onDragOver: @cancelDragEvent,
+                label
+                    htmlFor: @props.id,
+                    className: 'compose-label control-label',
                     @props.label
-                knownContacts
-                div className: 'contact-group dropdown ' + listClass,
+
+                @state.known.map renderTag
+
+                div className: listClass,
                     textarea
                         id: @props.id
                         name: @props.id
                         className: 'form-control compose-input'
                         onKeyDown: @onKeyDown
+                        autoFocus: @props.focus
                         onBlur: @onBlur
                         onDrop: @onDrop
-                        onDragEnter: cancelDragEvent
-                        onDragLeave: cancelDragEvent
-                        onDragOver: cancelDragEvent
+                        onDragEnter: @cancelDragEvent
+                        onDragLeave: @cancelDragEvent
+                        onDragOver: @cancelDragEvent
                         ref: 'contactInput'
                         rows: 1
                         value: @state.unknown
-                        onChange: onChange
-                        onInput: onInput
-                        placeholder: placeholder
+                        onChange: @onChange
+                        onInput: @onInput
+                        placeholder: @getPlaceHolder()
                         'autoComplete': 'off'
                         'spellCheck': 'off'
 
@@ -187,6 +157,13 @@ module.exports = MailsInput = React.createClass
                 else
                     i className: 'avatar fa fa-user'
                 "#{contact.get 'fn'} <#{contact.get 'address'}>"
+
+    getPlaceHolder: ->
+        # don't display placeholder if there are dests
+        if @state.known.length > 0
+            placeholder = ''
+        else
+            placeholder = @props.placeholder
 
     onQuery: (char) ->
         query = @refs.contactInput.getDOMNode().value.split(',').pop().replace(/^\s*/, '')
@@ -237,6 +214,19 @@ module.exports = MailsInput = React.createClass
                     @onQuery(String.fromCharCode(evt.which))
                     return true
 
+    # in Chrome, we need to cancel some events for drop to work
+    cancelDragEvent: (event) =>
+        event.preventDefault()
+        # To prevent removing the contact when dropped where it has been dragged,
+        # we must set dropEffect to 'none'
+        # if Chrome, we can only access types of data, not data themselves
+        # In Chrome, types are an array; in Firefox, a DOMStringList
+        types = Array.prototype.slice.call(event.dataTransfer.types)
+        if types.indexOf(@props.id) is -1
+            event.dataTransfer.dropEffect = 'move'
+        else
+            event.dataTransfer.dropEffect = 'none'
+
 
     onBlur: ->
         # We must use a timeout, otherwise, when user click inside contact list,
@@ -244,6 +234,25 @@ module.exports = MailsInput = React.createClass
         setTimeout =>
             @addContactFromInput true
         , 100
+
+    onClick: ->
+        # set focus to input area when clicking into component
+        @refs.contactInput.getDOMNode().focus()
+
+    onInput: ->
+        input = @refs.contactInput.getDOMNode()
+        input.cols = input.value.length + 2
+        input.style.height = input.scrollHeight + 'px'
+
+    onChange: (event) ->
+        value = event.target.value.split ','
+        if value.length is 2
+            known = _.clone @state.known
+            known.push(MessageUtils.parseAddress value[0])
+            @props.valueLink.requestChange known
+            @setState unknown: value[1].trim()
+        else
+            @setState unknown: event.target.value
 
 
     # Grab text from the input and ensure it's a valid email address.

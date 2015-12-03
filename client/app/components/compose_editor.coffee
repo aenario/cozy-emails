@@ -335,7 +335,7 @@ module.exports = ComposeEditor = React.createClass
         e.preventDefault()
         files = e.target.files or e.dataTransfer.files
         # Add files to Compose file picker
-        @props.getPicker().addFiles files
+        @props.onFiles files
         if @props.composeInHTML
             for file in files
                 # for every image, insert it into the HTML compose editor
@@ -385,8 +385,7 @@ module.exports = ComposeEditor = React.createClass
             data      = FileUtils.dataURItoBlob answer.dataUrl
             blob      = new Blob([data.blob, {type: data.mime}])
             blob.name = answer.name
-            picker    = @props.getPicker()
-            picker.addFiles [blob]
+            @props.onFiles [blob]
             if @props.composeInHTML
                 if document.activeElement.classList.contains 'rt-editor'
                     # editor has focus, insert image at cursor position

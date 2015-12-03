@@ -222,6 +222,20 @@ class LayoutStore extends Store
                 message: t('account checked')
                 autoclose: true
 
+        handle ActionTypes.MESSAGE_SEND_FAILURE, ({error, message, isDraft}) ->
+            msgKo = if isDraft then t "message action draft ko"
+            else t "message action sent ko"
+
+            @_showNotification
+               message: msgKo
+               autoclose: true
+
+        handle ActionTypes.MESSAGE_SEND_SUCCESS, ({message, isDraft})->
+            unless isDraft
+                @_showNotification
+                    message: t "message action sent ok"
+                    autoclose: true
+
         handle ActionTypes.REFRESH_FAILURE, ({error}) ->
             AppDispatcher.waitFor [AccountStore.dispatchToken]
             @_showNotification
