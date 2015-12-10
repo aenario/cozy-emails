@@ -13,6 +13,7 @@ client/public
 client/app/locales/*.json
 !client/app/locales/en.json
 
+client/app/prosemirror
 doc
 last.html
 last.png
