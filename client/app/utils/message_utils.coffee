@@ -7,16 +7,6 @@ SearchStore      = require '../stores/search_store'
 
 QUOTE_STYLE = "margin-left: 0.8ex; padding-left: 1ex; border-left: 3px solid #34A6FF;"
 
-# Style is required to clean pre and p styling in compose editor.
-# It is removed by the visulasation iframe that's why we need to put
-# style at the p level too.
-COMPOSE_STYLE = """
-<style>
-pre {background: transparent; border: 0}
-</style>
-"""
-
-
 
 module.exports = MessageUtils =
 
@@ -210,10 +200,7 @@ module.exports = MessageUtils =
         message.bcc = []
         message.subject = @getReplySubject inReplyTo
         message.text = separator + @generateReplyText(text) + "\n"
-        message.html = """
-        #{COMPOSE_STYLE}
-        <p><br></p>
-        """
+        message.html = """<p><br></p>"""
 
         if isSignature
             @addSignature message, signature
@@ -256,10 +243,7 @@ module.exports = MessageUtils =
 
         message.subject = @getReplySubject inReplyTo
         message.text = separator + @generateReplyText(text) + "\n"
-        message.html = """
-            #{COMPOSE_STYLE}
-            <p><br></p>
-        """
+        message.html = """<p><br></p>"""
 
         if isSignature
             @addSignature message, signature
@@ -323,7 +307,7 @@ module.exports = MessageUtils =
             #{t 'compose forward prefix'}#{inReplyTo.get 'subject'}
             """
         message.text = textSeparator + text
-        message.html = "#{COMPOSE_STYLE}"
+        message.html = ""
 
         if isSignature
             @addSignature message, signature
@@ -357,7 +341,7 @@ module.exports = MessageUtils =
         message.bcc = []
         message.subject = ''
         message.text = ''
-        message.html = "#{COMPOSE_STYLE}\n<p><br></p>"
+        message.html = "<p><br></p>"
 
         if isSignature
             @addSignature message, signature
@@ -495,19 +479,8 @@ module.exports = MessageUtils =
     # * make "pre" without background
     # * remove margins to "p"
     wrapReplyHtml: (html) ->
-        html = html.replace /<p>/g, '<p style="margin: 0">'
-        return """
-            <style type="text/css">
-            blockquote {
-                margin: 0.8ex;
-                padding-left: 1ex;
-                border-left: 3px solid #34A6FF;
-            }
-            p {margin: 0;}
-            pre {background: transparent; border: 0}
-            </style>
-            #{html}
-            """
+        html.replace /<p>/g, '<p style="margin: 0">'
+
 
     # Add a reply prefix to the current subject. Do not add it again if it's
     # already there.

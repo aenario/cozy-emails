@@ -104,7 +104,7 @@ module.exports = Panel = React.createClass
             message = MessageStore.getByID @props.messageID
             return Spinner() unless message
 
-            account = AccountStore.getByID @props.accountID
+            account = AccountStore.getByID message.get('accountID')
             return Spinner() unless account
 
             composeAction = PANEL_ACTION_TO_COMPOSE_ACTION[@props.action]
@@ -115,7 +115,7 @@ module.exports = Panel = React.createClass
                 key: "compose-#{composeAction}-#{message.get('id')}"
                 message: MessageUtils.makeReplyMessage(
                     account.get('login'),
-                    options.inReplyTo,
+                    message,
                     composeAction,
                     true,
                     account.get('signature')
@@ -159,7 +159,6 @@ module.exports = Panel = React.createClass
     getStateFromStores: ->
         return {
             accounts              : AccountStore.getAll()
-            selectedAccount       : AccountStore.getSelectedOrDefault()
             settings              : SettingsStore.get()
             isLoadingReply        : not MessageStore.getByID(@props.messageID)?
         }

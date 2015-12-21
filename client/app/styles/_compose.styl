@@ -51,14 +51,56 @@
 
     .compose-content
         flex 1
-        overflow-y scroll
-        // it allows to display the children's div in full height
+        max-height 50em
         display flex
         align-items stretch
 
-        & > div
-            flex 1
+        .ProseMirror
+            flex 1 1 100%
+            width 100%
             display flex
+            align-items stretch
+            flex-direction column
+            border 0px
+            margin 0
+            padding 0
+
+        .ProseMirror-content
+            padding-left 0
+            padding-right 0
+            max-height 100%
+            flex 1 1 100%
+            display flex
+            flex-direction column
+            overflow-y auto
+
+            img
+                max-width 100%
+
+        .ProseMirror-menubar
+            width 100%
+            flex 0 0 2em
+
+        .ProseMirror-menubar-inner
+            color: basecolor
+            border-bottom 1px solid lightcolor
+
+        .ProseMirror-select
+        .ProseMirror-select-menu
+            background white
+            color basecolor
+            border 0px
+            border-radius 0px
+
+            &::after
+                color basecolor
+
+
+            div:hover
+                background-color lightcolor
+
+        .ProseMirror-select-menu
+            border-left 1px solid basecolor
 
     .editor,
     .rt-editor
