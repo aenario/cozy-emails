@@ -4,10 +4,11 @@
 classer = React.addons.classSet
 
 {Spinner, Clearfix} = require './basic_components'
-ComposeEditor  = require './compose_editor'
+Editor  = require './compose_prosemirror'
 ComposeToolbox = require './compose_toolbox'
 FilePicker     = require './file_picker'
 MailsInput     = require './mails_input'
+
 
 AccountPicker = require './account_picker'
 
@@ -45,7 +46,7 @@ module.exports = Compose = React.createClass
         useIntents : React.PropTypes.bool.isRequired
 
     getStateFromStores: ->
-        composeInHTML = true
+        composeInHTML = false
         message       = @state?.message or @props.message
         accountID     = @state?.accountID or
                         AccountStore.getSelectedOrDefault().get 'id'
@@ -64,9 +65,7 @@ module.exports = Compose = React.createClass
             accountID: AccountStore.getSelectedOrDefault().get 'id'
             accounts: AccountStore.getAll()
             isNew: not message?
-            sending: false
             settings: SettingsStore.get()
-            saving: true
             # use "isnt false" to ignore undefined
             ccShown: @state?.ccShown isnt false and message.get('cc')?.length
             bccShown: @state?.bccShown isnt false and message.get('bcc')?.length
@@ -147,21 +146,14 @@ module.exports = Compose = React.createClass
                     className: 'form-control compose-subject'
                     placeholder: t "compose subject help"
 
-                div className: 'compose-content',
-                    ComposeEditor
-                        id                : 'compose-editor'
-                        messageID         : @props.message?.get 'id'
-                        html              : @linkMessageState('html')
-                        text              : @linkMessageState('text')
-                        accounts          : @props.accounts
-                        accountID         : @state.accountID
-                        settings          : @state.settings
-                        onSend            : @onSend
-                        composeInHTML     : @state.composeInHTML
-                        focus             : @state.focus is 'editor'
-                        ref               : 'editor'
-                        onFiles           : @onFilesInEditor
-                        useIntents        : @props.useIntents
+                Editor
+                    html              : @state.composeInHTML
+                    signature         : @getSignature()
+                    focus             : @state.focus is 'editor'
+                    ref               : 'editor'
+                    valueLink         : @getContentValueLink()
+                    onFiles           : @onFilesInEditor
+                    useIntents        : @props.useIntents
 
                 div className: 'attachements',
                     FilePicker
@@ -251,6 +243,14 @@ module.exports = Compose = React.createClass
             address: account.get('login')
         ]
         return message
+
+    getSignature: ->
+        account = @state.accounts.get @state.accountID
+        return account?.get('signature')
+
+    getContentValueLink: ->
+        if @state.composeInHTML then @linkMessageState('html')
+        else @linkMessageState('text')
 
     validationError: (isDraft) ->
         # no validation for drafts
