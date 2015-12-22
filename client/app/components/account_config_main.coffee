@@ -49,7 +49,7 @@ module.exports = AccountConfigMain = React.createClass
 
     makeLinkState: (field) ->
         cached = (@__cacheLS ?= {})[field]
-        value =  @props.editedAccount.get(field) or ''
+        value =  @props.editedAccount.get(field)
         if cached?.value is value then return cached
         else return @__cacheLS[field] =
             value: value
@@ -68,14 +68,17 @@ module.exports = AccountConfigMain = React.createClass
                 changes.smtpSSL = value is '465'
                 changes.smtpTLS = value is '587'
             when 'imapSSL'
-                unless @state.imapManualPort
+                if @props.editedAccount.get('imapPort').toString() in ['993', '143']
                     changes.imapPort = if value then '993' else '143'
+                changes.imapTLS = false if value
             when 'smtpSSL'
-                unless @state.smtpManualPort
+                if @props.editedAccount.get('smtpPort').toString() in ['25', '465', '587']
                     changes.smtpPort = if value then '465' else '25'
+                changes.smtpTLS = false if value
             when 'smtpTLS'
-                unless @state.smtpManualPort
+                if @props.editedAccount.get('smtpPort').toString() in ['25', '465', '587']
                     changes.smtpPort = if value then '587' else '25'
+                changes.smtpSSL = false if value
             when 'login'
                 @doDiscovery value?.split('@')[1]
 
