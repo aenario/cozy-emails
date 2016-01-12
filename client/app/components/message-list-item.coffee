@@ -7,23 +7,12 @@ MessageUtils = require '../utils/message_utils'
 colorhash    = require '../utils/colorhash'
 Participants        = require './participant'
 MessageActionCreator = require '../actions/message_action_creator'
-
+ShouldUpdate = require '../mixins/should_update_mixin'
 
 module.exports = MessageItem = React.createClass
     displayName: 'MessagesItem'
 
-    mixins: [RouterMixin]
-
-    shouldComponentUpdate: (nextProps, nextState) ->
-        # we must do the comparison manually because the property "onSelect" is
-        # a function (therefore it should not be compared)
-        updatedProps = Object.keys(nextProps).filter (prop) =>
-            return typeof nextProps[prop] isnt 'function' and
-                not (_.isEqual(nextProps[prop], @props[prop]))
-        shouldUpdate = not _.isEqual(nextState, @state) or
-            updatedProps.length > 0
-
-        return shouldUpdate
+    mixins: [RouterMixin, ShouldUpdate.Logging]
 
     render: ->
         message = @props.message
@@ -136,9 +125,9 @@ module.exports = MessageItem = React.createClass
             span className: 'mailbox-tag', label
 
     onSelect: (e) ->
-        @props.onSelect(not @props.selected)
         e.preventDefault()
         e.stopPropagation()
+        @props.onSelect @props.message.get('id'), not @props.selected
 
     getUrl: ->
         params =
@@ -163,7 +152,7 @@ module.exports = MessageItem = React.createClass
     onMessageClick: (event) ->
         node = @refs.target.getDOMNode()
         if @props.edited and event.target.classList.contains 'select-target'
-            @props.onSelect(not @props.selected)
+            @props.onSelect(@props.message.get('id'), not @props.selected)
             event.preventDefault()
             event.stopPropagation()
         # When hitting `enter` in deletion confirmation dialog, this
@@ -175,7 +164,7 @@ module.exports = MessageItem = React.createClass
         else if not (event.target.getAttribute('type') is 'checkbox')
             event.preventDefault()
             event.stopPropagation()
-            MessageActionCreator.setCurrent node.dataset.messageId, true
+            MessageActionCreator.setCurrent @props.message.get('id'), true
             if @props.settings.get('displayPreview')
                 href = '#' + node.getAttribute('href').split('#')[1]
                 @redirect href

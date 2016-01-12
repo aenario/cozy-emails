@@ -21,6 +21,9 @@ exports.config =
             processors: [
                 require('autoprefixer')(['last 2 versions'])
             ]
+        browserSync:
+            enabled:
+                false
 
 
     overrides:

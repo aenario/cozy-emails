@@ -26,6 +26,7 @@ MessageListLoader   = require './message-list-loader'
 {Spinner, Progress} = require './basic_components'
 ToolbarMessagesList = require './toolbar_messageslist'
 MessageListBody = require './message-list-body'
+ShouldUpdate = require '../mixins/should_update_mixin'
 
 CONVERSATION_DISABLED = ['trashMailbox','draftMailbox','junkMailbox']
 {MessageFilter} = require '../constants/app_constants'
@@ -39,6 +40,7 @@ module.exports = MessageList = React.createClass
         RouterMixin,
         TooltipRefresherMixin
         StoreWatchMixin [LayoutStore, AccountStore, MessageStore]
+        ShouldUpdate.UnderscoreEqualitySlow
     ]
 
     getStateFromStores: ->

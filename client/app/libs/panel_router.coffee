@@ -51,32 +51,41 @@ module.exports = class Router extends Backbone.Router
         @_bindRoutes()
 
         # Updates the LayoutStore for each matched request
-        @on 'route', (name, args) =>
+        @on 'route', @onRoute
 
-            if name is 'default'
-                @current = {firstPanel: null, secondPanel: null}
-                url = @buildUrl
-                    direction: 'first'
-                    fullWidth: true
-                    action: LayoutActionCreator.getDefaultRoute()
-                    parameters: [null]
 
-                return @navigate url, trigger: true
+    onRoute: (name, args) =>
 
-            [firstPanelInfo, secondPanelInfo] = @_processSubRouting name, args
+        if @beforeNavigate and not ignoreBeforeNavigate
+            shouldNavigate = @beforeNavigate()
+            unless shouldNavigate
+                # @TODO : should restore the hash
+                return null
 
-            firstAction = @fluxActionFactory firstPanelInfo
-            secondAction = @fluxActionFactory secondPanelInfo
+        if name is 'default'
+            @current = {firstPanel: null, secondPanel: null}
+            url = @buildUrl
+                direction: 'first'
+                fullWidth: true
+                action: LayoutActionCreator.getDefaultRoute()
+                parameters: [null]
 
-            @previous = @current
-            @current = firstPanel: firstPanelInfo, secondPanel: secondPanelInfo
+            return @navigate url, trigger: true
 
-            if firstAction?
-                firstAction firstPanelInfo, 'first'
+        [firstPanelInfo, secondPanelInfo] = @_processSubRouting name, args
 
-            if secondAction?
-                secondAction secondPanelInfo, 'second'
-            @trigger 'fluxRoute', @current
+        firstAction = @fluxActionFactory firstPanelInfo
+        secondAction = @fluxActionFactory secondPanelInfo
+
+        @previous = @current
+        @current = firstPanel: firstPanelInfo, secondPanel: secondPanelInfo
+
+        if firstAction?
+            firstAction firstPanelInfo, 'first'
+
+        if secondAction?
+            secondAction secondPanelInfo, 'second'
+        @trigger 'fluxRoute', @current
 
 
     ###

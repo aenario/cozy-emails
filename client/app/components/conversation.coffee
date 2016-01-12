@@ -38,6 +38,8 @@ module.exports = React.createClass
                            .getConversation conversationID, trashMailboxID
             prevMessage = MessageStore.getPreviousMessage(true)
             nextMessage = MessageStore.getNextMessage(true)
+            prevMessage = MessageStore.getPreviousMessage()
+            nextMessage = MessageStore.getNextMessage()
             length = MessageStore.getConversationsLength().get conversationID
             selectedMailboxID ?= Object.keys(message.get('mailboxIDs'))[0]
 
@@ -131,6 +133,7 @@ module.exports = React.createClass
                 p null, t "app loading"
 
         message = @state.conversation.get 0
+        console.log "render", message.get('subject')
         # Sort messages in conversation to find seen messages and group them
         messages = []
         lastMessageIndex = @state.conversation.length - 1

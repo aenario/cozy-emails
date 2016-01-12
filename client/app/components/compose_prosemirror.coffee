@@ -5,6 +5,7 @@ require '../prosemirror/menu/menubar'
 FileUtils = require '../utils/file_utils'
 {Spinner} = require './basic_components'
 {Image: PMImage} = require '../prosemirror/model/index'
+{Keymap} = require '../prosemirror/edit/keys'
 {div} = React.DOM
 
 module.exports = ProseMirrorComponent = React.createClass
@@ -72,6 +73,19 @@ module.exports = ProseMirrorComponent = React.createClass
             options.menuBar = float: true
 
         @pm = new ProseMirror options
+        enterEffects = @pm.options.keymap.bindings['Enter']
+
+        # [
+        #     @pm.commands.createParagraphNear.name
+        #     @pm.commands.liftEmptyBlock.name
+        #     @pm.commands.splitListItem.name
+        #     @pm.commands.splitBlock.name
+        # ]
+
+        @pm.addKeymap new Keymap
+            "Enter": [@pm.commands.insertHardBreak.name]
+            "Mod-Enter": enterEffects
+            "Shift-Enter": enterEffects
 
         # dont allow img creation
         if @props.html
@@ -125,3 +139,4 @@ module.exports = ProseMirrorComponent = React.createClass
             alt: file.name
 
         @pm.apply @pm.tr.insert @pm.selection.from, img
+

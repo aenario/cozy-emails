@@ -5,7 +5,6 @@
 module.exports = ComposeToolbox = React.createClass
     displayName: 'ComposeToolbox'
 
-
     render: ->
         if @props.sending
             labelSend = t 'compose action sending'
@@ -19,7 +18,7 @@ module.exports = ComposeToolbox = React.createClass
                         className: 'btn btn-cozy btn-send',
                         type: 'button',
                         disable: if @props.sending then true else null
-                        onClick: @props.onSend,
+                        onClick: @onSend,
                             if @props.sending
                                 span null, Spinner(color: 'white')
                             else
@@ -28,7 +27,7 @@ module.exports = ComposeToolbox = React.createClass
                     button
                         className: 'btn btn-cozy btn-save',
                         disable: if @props.saving then true else null
-                        type: 'button', onClick: @props.onDraft,
+                        type: 'button', onClick: @onDraft,
                             if @props.saving
                                 span null, Spinner(color: 'white')
                             else
@@ -38,10 +37,27 @@ module.exports = ComposeToolbox = React.createClass
                         button
                             className: 'btn btn-cozy-non-default btn-delete',
                             type: 'button',
-                            onClick: @props.onDelete,
+                            onClick: @onDelete,
                                 span className: 'fa fa-trash-o'
                                 span null, t 'compose action delete'
                     button
-                        onClick: @props.onCancel
+                        onClick: @onCancel
                         className: 'btn btn-cozy-non-default btn-cancel',
                         t 'app cancel'
+
+    # @TODO : replace button by a and remove these proxy functions
+    onSave: (e) ->
+        e.preventDefault()
+        @props.onSave()
+
+    onDraft: (e) ->
+        e.preventDefault()
+        @props.onDraft()
+
+    onDelete: (e) ->
+        e.preventDefault()
+        @props.onDelete()
+
+    onCancel: (e) ->
+        e.preventDefault()
+        @props.onCancel()

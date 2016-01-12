@@ -3,7 +3,14 @@
 Alert          = require './alert'
 Menu           = require './menu'
 Modal          = require './modal'
-Panel          = require './panel'
+AccountConfig  = require './account_config'
+ComposePanel   = require './compose_panel'
+Conversation   = require './conversation'
+MessageList    = require './message-list'
+Settings       = require './settings'
+SearchResult   = require './search_result'
+{Spinner}      = require './basic_components'
+MailboxPanel   = require './mailbox_panel'
 ToastContainer = require './toast_container'
 Tooltips       = require './tooltips-manager'
 
@@ -22,8 +29,7 @@ Stores        = [AccountStore, MessageStore, LayoutStore, SearchStore]
 # Flux actions
 LayoutActionCreator  = require '../actions/layout_action_creator'
 MessageActionCreator = require '../actions/message_action_creator'
-
-{MessageFilter} = require '../constants/app_constants'
+ShouldUpdate = require '../mixins/should_update_mixin'
 
 ###
     This component is the root of the React tree.
@@ -44,9 +50,11 @@ module.exports = Application = React.createClass
         StoreWatchMixin Stores
         RouterMixin
         TooltipRefesherMixin
+        ShouldUpdate.UnderscoreEqualitySlow
     ]
 
     render: ->
+        console.log "render"
         # Shortcut
         # TODO: Improve the way we display a loader when app isn't ready
         layout = @props.router.current
@@ -78,9 +86,9 @@ module.exports = Application = React.createClass
                     div
                         className: 'panels'
 
-                        @getPanel layout.firstPanel, 'firstPanel'
+                        @getPanel layout.firstPanel
                         if layout.secondPanel?
-                            @getPanel layout.secondPanel, 'secondPanel'
+                            @getPanel layout.secondPanel
                         else
                             section
                                 key:             'placeholder'
@@ -98,33 +106,59 @@ module.exports = Application = React.createClass
 
 
     getPanel: (panel, ref) ->
-        Panel
-            ref               : ref
-            action            : panel.action
-            accountID         : panel.parameters.accountID
-            mailboxID         : panel.parameters.mailboxID
-            messageID         : panel.parameters.messageID
-            tab               : panel.parameters.tab
-            useIntents        : @state.useIntents
-            selectedMailboxID : @state.selectedMailboxID
+        # -- Generates a list of messages for a given account and mailbox
+        if panel.action is 'account.mailbox.messages'
+            MailboxPanel
+                key: 'messageList-' + panel.parameters.mailboxID
 
+        else if panel.action is 'search'
+            SearchResult
+                key: "search-results"
+
+        # -- Generates a configuration window for a given account
+        else if panel.action in ['account.config','account.new']
+            AccountConfig
+                key: "account-config-#{panel.parameters.accountID or 'new'}"
+                tab: panel.parameters.tab
+
+        # -- Generates a conversation
+        else if panel.action in ['message','conversation']
+            Conversation
+                key: 'conversation-' + panel.parameters.messageID
+                messageID: panel.parameters.messageID
+                ref: 'conversation'
+
+        # -- Generates the new message composition form
+        else if panel.action is 'compose' or
+                panel.action is 'edit' or
+                panel.action is 'compose.reply' or
+                panel.action is 'compose.reply-all' or
+                panel.action is 'compose.forward'
+
+            ComposePanel
+                action: panel.action
+                messageID: panel.parameters.messageID
+                useIntents: @state.useIntents
+
+        # -- Display the settings form
+        else if panel.action is 'settings'
+            Settings
+                key     : 'settings'
+                ref     : 'settings'
+
+        # -- Error case, shouldn't happen. Might be worth to make it pretty.
+        else
+            console.error "Unknown action #{panel.action}"
+            window.cozyMails.logInfo "Unknown action #{panel.action}"
+            return React.DOM.div null, "Unknown component #{panel.action}"
 
     getStateFromStores: ->
         selectedAccount = AccountStore.getSelectedOrDefault()
 
-        firstPanelInfo = @props.router.current?.firstPanel
-        if firstPanelInfo?.action is 'account.mailbox.messages'
-            selectedMailboxID = firstPanelInfo.parameters.mailboxID
-        else
-            selectedMailboxID = null
-
-
         return {
             selectedAccount       : selectedAccount
-            currentSearch         : SearchStore.getCurrentSearch()
             modal                 : LayoutStore.getModal()
             useIntents            : LayoutStore.intentAvailable()
-            selectedMailboxID     : selectedMailboxID
         }
 
 
@@ -155,7 +189,7 @@ module.exports = Application = React.createClass
     checkAccount: (action) ->
         # "special" mailboxes must be set before accessing to the account
         # otherwise, redirect to account config
-        account = @state.selectedAccount
+        account = AccountStore.getSelectedOrDefault()
 
         noSpecialFolder = not account?.get('draftMailbox')? or
                not account?.get('sentMailbox')? or

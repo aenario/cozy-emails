@@ -18,7 +18,7 @@
     padding-bottom 1em
     display flex
     flex-direction column
-    flex-wrap wrap
+    // flex-wrap wrap
     height calc(100vh - 2em)
 
     &.enable
@@ -52,6 +52,7 @@
     .compose-content
         flex 1
         max-height 50em
+        overflow hidden // needed to work on FF, not sure why
         display flex
         align-items stretch
 
@@ -146,7 +147,6 @@
             cursor pointer
 
     .compose-subject
-        height    2.5em
         padding   0
         border    none
         font-size 1.4rem
