@@ -8,7 +8,7 @@
     "node-event-emitter": "0.0.1",
     "node-polyglot": "0.3.0",
     "pretty-hrtime": "0.2.1",
-    "prosemirror": "git+ssh://git@github.com:ProseMirror/prosemirror.git",
+    "prosemirror": "git+ssh://git@github.com:ProseMirror/prosemirror.git#7b828cfc",
     "react": "0.11.1",
     "superagent": "0.18.2",
     "underscore": "1.6.0"
@@ -35,6 +35,8 @@
     "chai": "1.9.1"
   },
   "scripts": {
-    "build-editor": "npm run prosemirror dist && cp -R ./node_modules/prosemirror/dist ./app/prosemirror/"
+    "postinstall": "npm run build-editor && npm run cp-editor",
+    "build-editor": "cd node_modules/prosemirror && npm install && npm run dist",
+    "cp-editor":  "cp -R ./node_modules/prosemirror/dist/* ./app/prosemirror/"
   }
 }
