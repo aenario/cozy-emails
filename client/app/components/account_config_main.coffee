@@ -50,7 +50,7 @@ module.exports = AccountConfigMain = React.createClass
     makeLinkState: (field) ->
         cached = (@__cacheLS ?= {})[field]
         value =  @props.editedAccount.get(field)
-        if cached?.value is value then return cached
+        if value and cached?.value is value then return cached
         else return @__cacheLS[field] =
             value: value
             requestChange: (value) =>
