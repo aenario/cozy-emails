@@ -90,7 +90,8 @@ module.exports = Dispatcher = class Dispatcher
         @param {object} payload
     ###
     dispatch: (payload) ->
-        console.log "DIS", payload.action.type, payload.action.value
+        line = new Error().stack.split("\n")[3..4].join("\n")
+        console.log "DIS", payload.action.type, payload.action.value, line
         message = 'Dispatch.dispatch(...): Cannot dispatch in the middle ' + \
                   'of a dispatch.'
         invariant(

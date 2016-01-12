@@ -21,6 +21,7 @@ Participants        = require './participant'
 {Spinner, Progress} = require './basic_components'
 ToolbarMessagesList = require './toolbar_messageslist'
 MessageListBody = require './message-list-body'
+ShouldUpdate = require '../mixins/should_update_mixin'
 
 
 module.exports = MessageList = React.createClass
@@ -30,12 +31,8 @@ module.exports = MessageList = React.createClass
         RouterMixin,
         TooltipRefresherMixin
         StoreWatchMixin [LayoutStore]
+        ShouldUpdate.UnderscoreEqualitySlow
     ]
-
-    shouldComponentUpdate: (nextProps, nextState) ->
-        should = not(_.isEqual(nextState, @state)) or
-            not (_.isEqual(nextProps, @props))
-        return should
 
     getInitialState: ->
         edited: false
@@ -55,6 +52,7 @@ module.exports = MessageList = React.createClass
             @setState allSelected: false, edited: false
 
     render: ->
+        console.log "mes list render", @props.messages.length
         section
             key:               "messages-list-#{@props.mailboxID}"
             ref:               'list'

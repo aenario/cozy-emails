@@ -5,6 +5,14 @@ AppDispatcher = require '../app_dispatcher'
 SettingsStore = require '../stores/settings_store'
 LayoutActionCreator = require './layout_action_creator'
 
+
+enableNotifications = ->
+    if window.Notification?
+        Notification.requestPermission (status) ->
+            # This allows to use Notification.permission with Chrome/Safari
+            if Notification.permission isnt status
+                Notification.permission = status
+
 module.exports = SettingsActionCreator =
 
     edit: (inputValues) ->
@@ -16,4 +24,9 @@ module.exports = SettingsActionCreator =
                 AppDispatcher.handleViewAction
                     type: ActionTypes.SETTINGS_UPDATED
                     value: values
+
+                if values.desktopNotifications
+                    enableNotifications()
+
+
 

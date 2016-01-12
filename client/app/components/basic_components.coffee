@@ -128,6 +128,17 @@ FormButtons = React.createClass
     render: ->
         div className: 'col-sm-offset-4', @props.children
 
+
+FormLine = React.createClass
+
+    render: ->
+        classLabel = 'col-sm-5 col-sm-offset-1 control-label'
+
+        div className: 'form-group',
+            label htmlFor: @props.fieldID, className: classLabel,
+                t "settings label layoutStyle"
+            @props.children...
+
 MenuItem = React.createClass
 
     onClick: ->

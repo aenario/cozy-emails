@@ -34,11 +34,15 @@ module.exports = React.createClass
         selectedMailboxID = AccountStore.getSelectedMailbox()?.get 'id'
         selectedAccount = AccountStore.getSelectedOrDefault()
 
+        console.log "ZAP", message?.get('subject')
+
         if message?
             conversationID = message?.get('conversationID')
             trashMailboxID = selectedAccount?.get('trashMailbox')
             conversation = MessageStore
                            .getConversation conversationID, trashMailboxID
+
+            console.log "DAP", conversation.get(0).get('subject')
             prevMessage = MessageStore.getPreviousMessage()
             nextMessage = MessageStore.getNextMessage()
             length = MessageStore.getConversationsLength().get conversationID
@@ -141,6 +145,7 @@ module.exports = React.createClass
                 p null, t "app loading"
 
         message = @state.conversation.get 0
+        console.log "render", message.get('subject')
         # Sort messages in conversation to find seen messages and group them
         messages = []
         lastMessageIndex = @state.conversation.length - 1

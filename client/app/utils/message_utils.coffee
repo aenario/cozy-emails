@@ -108,6 +108,8 @@ module.exports = MessageUtils =
     # required too.
     # It adds signature at the end of the zone where the user will type.
     makeReplyMessage: (myAddress, inReplyTo, action, inHTML, signature) ->
+
+        console.log "makeReplyMessage", arguments
         message =
             composeInHTML: inHTML
             attachments: Immutable.Vector.empty()
@@ -489,6 +491,32 @@ module.exports = MessageUtils =
         if subject.indexOf(replyPrefix) isnt 0
             subject = "#{replyPrefix}#{subject}"
         subject
+
+    # set source of attached images
+    cleanHTML: (message) ->
+
+        html = message.html
+
+        parser = new DOMParser()
+        doc    = parser.parseFromString html, "text/html"
+
+        if not doc
+            doc = document.implementation.createHTMLDocument("")
+            doc.documentElement.innerHTML = html
+
+        if doc
+            # the contentID of attached images will be in the data-src attribute
+            # override image source with this attribute
+            images = doc.querySelectorAll 'IMG[data-src]'
+            for image in images
+                image.setAttribute 'src', "cid:#{image.dataset.src}"
+
+            html = doc.documentElement.innerHTML
+        else
+            console.error "Unable to parse HTML content of message"
+
+        message.text = MessageUtils.cleanReplyText message.html
+        message.html = MessageUtils.wrapReplyHtml html
 
     # To keep HTML markup light, create the contact tooltip dynamicaly
     # on mouse over
