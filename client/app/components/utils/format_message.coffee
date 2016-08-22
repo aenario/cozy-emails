@@ -1,4 +1,5 @@
-SettingsStore = require '../../stores/settings_store'
+SettingsStore = require('../../puregetters/settings')
+reduxStore = require('../../reducers/_store')
 Immutable = require 'immutable'
 {MessageActions} = require '../../constants/app_constants'
 ContactGetter     = require '../../getters/contact'
@@ -393,7 +394,7 @@ _cleanContent = (message) ->
 _cleanHTML = (props={}) ->
     {html, displayImages} = props
     imagesWarning = false
-    displayImages ?= SettingsStore.get 'messageDisplayImages'
+    displayImages ?= SettingsStore.get reduxStore.getState(), 'messageDisplayImages'
 
     # Add HTML to a document
     parser = new DOMParser()
@@ -501,8 +502,8 @@ _toAbsolutePath = (elm, attribute, prefix='http://') ->
         elm.setAttribute attribute, prefix + value
 
 # coffeelint: disable=cyclomatic_complexity
-module.exports.formatContent = (message) ->
-    displayHTML = SettingsStore.get 'messageDisplayHTML'
+exports.formatContent = (message) ->
+    displayHTML = SettingsStore.get reduxStore.getState(), 'messageDisplayHTML'
 
     # display full headers
     fullHeaders = []
