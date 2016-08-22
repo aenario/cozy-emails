@@ -213,8 +213,6 @@ module.exports =
         if pageAfter
             filter = filter.set('pageAfter', pageAfter)
 
-        # console.log('THERE', pageAfter, filter)
-
         return Routes.makeURL MessageActions.SHOW_ALL,
             mailboxID: @getMailboxID(state)
             filter: filter.toSimpleJS()
