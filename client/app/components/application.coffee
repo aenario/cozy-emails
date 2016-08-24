@@ -23,7 +23,7 @@ ContactGetter = require '../getters/contact'
 
 
 
-store = require('../reducers/_store')
+store = require('../redux_store')
 {Provider, connect} = require('react-redux')
 
 
