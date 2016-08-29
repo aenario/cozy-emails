@@ -172,21 +172,19 @@ module.exports = (state = DEFAULT_STATE, action, appstate) ->
             {target} = action.value
             if target.messageID is state.get('messageID')
                 nearestMessage = state.get('nearestMessage')
-                state = state.merge
+                return state.merge
                     messageID: nearestMessage?.get('id')
                     conversationID: nearestMessage?.get('conversationID')
 
-                return state
 
 
         when ActionTypes.RECEIVE_MESSAGE_DELETE
             messageID = action.value
             if messageID is state.get('messageID')
                 nearestMessage = RouterGetter.getNearestMessage(appstate)
-                state = state.merge
+                return state.merge
                     messageID: nearestMessage?.get('id')
                     conversationID: nearestMessage?.get('conversationID')
 
-                return state
 
     return state

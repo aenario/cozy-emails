@@ -55,11 +55,10 @@ describe('RouterStore', () => {
 
 
   after(() => {
-      delete global.t;
+    delete global.t;
   });
 
   beforeEach(() => {
-    // Dispatcher.dispatch({ type: ActionTypes.RESET_FOR_TESTS });
 
     // Reverse relation value to simplify tests
     // ie. routes['messageList'] = url

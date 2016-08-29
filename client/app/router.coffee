@@ -15,7 +15,8 @@ Polyglot = require 'node-polyglot'
 moment   = require 'moment'
 
 # MessageList :
-# ?sort=asc&filters=&status=unseen&start=2016-02-27T23:00:00.000Z&end=2016-03-05T22:59:59.999Z
+# ?sort=asc&filters=&status=unseen&start=2016-02-27T23:00:00.000Z
+# &end=2016-03-05T22:59:59.999Z
 
 # Extract params from q queryString to an object that map `key` > `value`.
 # Extracted values can be:

@@ -12,6 +12,7 @@ AUTOCLOSETIMER = 2000
 ###
 
 Notification = Immutable.Record
+    id: undefined
     message: ""
     level: ActionTypes.INFO
     errors: []
@@ -71,7 +72,7 @@ _makeMessage = (target, actionAndOK, errMsg)->
         smart_count: smart_count
 
 
-DEFAULT_STATE = Immutable.List()
+DEFAULT_STATE = Immutable.Map()
 
 module.exports = (state = DEFAULT_STATE, action) ->
 
@@ -188,3 +189,5 @@ module.exports = (state = DEFAULT_STATE, action) ->
             {message} = action.value
             message = "#{t 'notif new title'} #{message}"
             return notify state, AlertLevel.INFO, message
+
+    return state
