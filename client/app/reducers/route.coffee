@@ -1,6 +1,7 @@
 {ActionTypes} = require '../constants/app_constants'
 
-{AccountActions, MessageActions} = require '../constants/app_constants'
+{DefaultActions, AccountActions,
+MessageActions} = require '../constants/app_constants'
 
 MessageGetter = require '../puregetters/messages'
 RouterGetter = require '../puregetters/router'
@@ -22,6 +23,16 @@ module.exports = (state = DEFAULT_STATE, action, appstate) ->
             throw new Error("malformed action") unless action.value
             {accountID, mailboxID, tab, filter, action: routeAction,
             messageID, conversationID} = action.value
+
+
+            if routeAction is DefaultActions.DEFAULT
+                firstAccount = appstate.get('accounts').first()
+                if firstAccount
+                    routeAction = MessageActions.SHOW_ALL
+                    accountID = firstAccount.get('id')
+                    mailboxID = firstAccount.get('inboxMailbox')
+                else
+                    routeAction = AccountActions.CREATE
 
             if appstate.get('accounts').size
                 if mailboxID
@@ -101,12 +112,27 @@ module.exports = (state = DEFAULT_STATE, action, appstate) ->
 
 
         when ActionTypes.REMOVE_ACCOUNT_SUCCESS
-            account = RouterGetter.getDefaultAccount(appstate)
+            deletedAccountID = action.value.accountID
+            currentAccountID = state.get('accountID')
 
-            state = state.merge
-                accountID: account?.get 'id'
-                mailboxID: account?.get 'inboxMailbox'
-                tab: DEFAULT_TAB
+            if deletedAccountID is currentAccountID
+                nextAccount = RouterGetter.getAllAccounts(appstate)
+                .filter (account) -> account.get('id') isnt deletedAccountID
+                .first()
+
+                if nextAccount
+                    state = state.merge
+                        action: AccountActions.EDIT
+                        accountID: nextAccount?.get 'id'
+                        mailboxID: nextAccount?.get 'inboxMailbox'
+                        tab: DEFAULT_TAB
+
+                else
+                    state = state.merge
+                        action: AccountActions.CREATE
+                        accountID: null
+                        mailboxID: null
+                        tab: DEFAULT_TAB
 
             return state
 

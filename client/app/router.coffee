@@ -38,8 +38,6 @@ _parseQuery = (query) ->
             value or true
     return params
 
-routes.BACKBONE_ROUTES[''] = 'DEFAULT'
-
 class Router extends Backbone.Router
 
     routes: routes.BACKBONE_ROUTES
@@ -50,11 +48,12 @@ class Router extends Backbone.Router
         # Display application
         _displayApplication()
 
+        @on 'route', @onRouteMatched
+
         # Start Navigation
         Backbone.history.start()
 
         reduxStore.subscribe @onDispatch
-
 
     onRouteMatched: (name, paramsValues)->
         # console.log "THERE", name, paramsValues
